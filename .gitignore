@@ -1,0 +1,22 @@
+# Dependencies
+client/node_modules/
+server/node_modules/
+
+# Environment variables / secrets
+client/.env
+server/.env
+.env
+.env.*
+
+# Uploaded PDFs
+server/uploads/
+
+# Framework and build output
+client/.next/
+client/out/
+client/dist/
+server/dist/
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,11 @@
+services:
+  valkey:
+    image: valkey/valkey:latest
+    ports:
+      - "6397:6379"
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
