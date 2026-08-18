@@ -60,7 +60,7 @@ app.post('/uploads/pdf', upload.single('pdf'),async (req, res) => {
 });
 
 app.get('/chat', async (req,res) =>{
-    const userQuery = 'How to use fs module'
+    const userQuery = req.query.message;
     const embeddings = new GoogleGenerativeAIEmbeddings({
     model: 'gemini-embedding-001',
     });
