@@ -1,27 +1,39 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
-import path from 'path';
 import {Queue} from "bullmq"
 import { QdrantVectorStore } from '@langchain/qdrant';
 import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
-import 'dotenv/config';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import IORedis from 'ioredis';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const model = new ChatGoogleGenerativeAI({
-  model: 'gemini-2.5-flash',
-  temperature: 0.2,
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const envFile =
+  process.env.NODE_ENV === 'production'
+    ? '.env.production'
+    : '.env.local';
+
+const envPath = path.join(__dirname, envFile);
+
+const result = dotenv.config({
+  path: envPath,
 });
 
 const app = express();
 
-const queue = new Queue('file-upload-queue', {
-  connection: {
-    host: '127.0.0.1',
-    port: 6397,
-  },
+const model = new ChatGoogleGenerativeAI({
+  model: process.env.GEMINI_CHAT_MODEL,
+  temperature: 0.2,
 });
 
+const connection = new IORedis(process.env.REDIS_URL);
+
+const queue = new Queue('file-upload-queue', {connection,});
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -40,7 +52,16 @@ const upload = multer({
     storage: storage
 });
 
-app.use(cors());
+
+const qdrantConfig = {
+  url: process.env.QDRANT_URL,
+  apiKey: process.env.QDRANT_API_KEY || undefined,
+  collectionName: process.env.QDRANT_COLLECTION,
+};
+
+
+app.use(cors({origin: process.env.CLIENT_ORIGIN,}),);
+
 
 app.get('/', (req, res) => {
     return res.json({
@@ -64,14 +85,8 @@ app.get('/chat', async (req,res) =>{
     const embeddings = new GoogleGenerativeAIEmbeddings({
     model: 'gemini-embedding-001',
     });
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(
-      embeddings,
-      {
-        url: 'http://127.0.0.1:6333',
-        collectionName: 'pdf-docs',
-      },
-    );
-  const retriever = vectorStore.asRetriever({ k: 2 });
+    const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings,qdrantConfig);
+    const retriever = vectorStore.asRetriever({ k: 2 });
     const docs = await retriever.invoke(userQuery);
 
     const context = docs
@@ -95,6 +110,6 @@ User question: ${userQuery}
   } 
 )
 
-app.listen(8000, () => {
-    console.log(`Server started on PORT ${8000}`);
+app.listen(process.env.PORT || 8000, () => {
+  console.log(`Server started on PORT ${process.env.PORT || 8000}`);
 });

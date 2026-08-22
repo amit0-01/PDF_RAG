@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch index.js",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
+    "start": "cross-env NODE_ENV=production node index.js",
     "dev:worker": "node --watch worker.js"
   },
   "author": "",
@@ -20,6 +21,7 @@
     "@langchain/textsplitters": "^1.0.1",
     "bullmq": "^6.1.1",
     "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
     "express": "^5.2.1",
     "ioredis": "^5.11.1",
     "multer": "^2.2.0",
