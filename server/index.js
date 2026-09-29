@@ -9,7 +9,7 @@ import IORedis from 'ioredis';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import { mkdir } from 'node:fs/promises';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -35,14 +35,17 @@ const connection = new IORedis(process.env.REDIS_URL);
 
 const queue = new Queue('file-upload-queue', {connection,});
 
+const uploadDirectory = path.join(__dirname, 'uploads');
+
+await mkdir(uploadDirectory, { recursive: true });
+
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/');
-    },
+  destination: (req, file, callback) => {
+    callback(null, uploadDirectory);
+  },
 
     filename: function (req, file, cb) {
-        const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
 
         cb(null, `${uniqueSuffix}-${file.originalname}`);
     }
