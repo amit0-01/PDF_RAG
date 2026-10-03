@@ -13,7 +13,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-const FileUploadComponent: React.FC = () => {
+interface FileUploadProps {
+  onUploadStatusChange: (uploaded: boolean) => void;
+}
+
+const FileUploadComponent: React.FC<FileUploadProps> = ({
+  onUploadStatusChange,
+}) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
   const [uploadedFile, setUploadedFile] = React.useState<string | null>(null);
@@ -30,6 +36,7 @@ const FileUploadComponent: React.FC = () => {
     setUploading(true);
     setUploadedFile(null);
     setError(null);
+    onUploadStatusChange(false);
 
     try {
       const formData = new FormData();
@@ -45,8 +52,10 @@ const FileUploadComponent: React.FC = () => {
       }
 
       setUploadedFile(file.name);
+      onUploadStatusChange(true);
     } catch {
       setError('Upload failed. Please try again.');
+      onUploadStatusChange(false);
     } finally {
       setUploading(false);
     }

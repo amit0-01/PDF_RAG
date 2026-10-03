@@ -23,14 +23,20 @@ interface IMessage {
   documents?: Doc[];
 }
 
-export default function ChatComponent() {
+interface ChatComponentProps {
+  isPdfUploaded: boolean;
+}
+
+export default function ChatComponent({
+  isPdfUploaded,
+}: ChatComponentProps) {
   const [message, setMessage] = React.useState<string>('');
   const [messages, setMessages] = React.useState<IMessage[]>([]);
 
   const handleChatMessage = async () => {
     const userMessage = message.trim();
 
-    if (!userMessage) return;
+    if (!userMessage || !isPdfUploaded) return;
 
     setMessages((prev) => [
       ...prev,
@@ -168,18 +174,32 @@ export default function ChatComponent() {
             onKeyDown={(event) => {
               if (event.key === 'Enter') handleChatMessage();
             }}
-            placeholder="Ask a question about your PDF..."
+            disabled={!isPdfUploaded}
+            placeholder={
+              isPdfUploaded
+                ? 'Ask a question about your PDF...'
+                : 'Please upload a PDF before chatting...'
+            }
           />
 
           <Button
             onClick={handleChatMessage}
-            disabled={!message.trim()}
+            disabled={!isPdfUploaded || !message.trim()}
             className="shrink-0"
           >
             <Send className="size-4" />
             Send
           </Button>
         </div>
+        {!isPdfUploaded && (
+          <p
+            className="mx-auto mt-2 max-w-3xl text-sm text-muted-foreground"
+            role="status"
+            aria-live="polite"
+          >
+            Please upload a PDF before chatting with the AI.
+          </p>
+        )}
       </footer>
     </section>
   );

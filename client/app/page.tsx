@@ -1,7 +1,12 @@
+'use client';
+
+import * as React from 'react';
 import FileUploadComponent from './components/file-upload';
 import ChatComponent from './components/chat';
 
 export default function Home() {
+  const [isPdfUploaded, setIsPdfUploaded] = React.useState(false);
+
   return (
     <main className="min-h-[calc(100vh-4rem)]">
       <div className="flex min-h-[calc(100vh-4rem)] flex-col lg:flex-row">
@@ -19,13 +24,13 @@ export default function Home() {
             </p>
 
             <div className="mt-6">
-              <FileUploadComponent />
+              <FileUploadComponent onUploadStatusChange={setIsPdfUploaded} />
             </div>
           </div>
         </aside>
 
         <section className="min-h-[calc(100vh-4rem)] w-full lg:w-[70vw]">
-          <ChatComponent />
+          <ChatComponent isPdfUploaded={isPdfUploaded} />
         </section>
       </div>
     </main>
